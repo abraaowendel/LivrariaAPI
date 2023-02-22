@@ -10,9 +10,10 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,13 +29,13 @@ public class BookService {
     }
 
     @Transactional
-    public List<Book> findAll() {
-        return repository.findAll();
+    public Page<Book> findAllPaginated(PageRequest pagination) {
+        return repository.findAll(pagination);
     }
     @Transactional
     public Book findById(Long id) {
-        Optional<Book> obj = repository.findById(id);
-        return obj.orElseThrow(() -> new ResourceNotFoundException("Livro não encontrado."));
+        Optional<Book> entity = repository.findById(id);
+        return entity.orElseThrow(() -> new ResourceNotFoundException("Livro não encontrado."));
     }
     @Transactional
     public Book insert(Book entity) {
@@ -68,7 +69,7 @@ public class BookService {
 
             return entity;
         }
-        catch (EntityNotFoundException e){
+        catch (EntityNotFoundException error){
             throw new ResourceNotFoundException("Livro não encontrado.");
         }
     }
@@ -77,7 +78,7 @@ public class BookService {
         try {
             repository.deleteById(id);
         }
-        catch (EmptyResultDataAccessException e) {
+        catch (EmptyResultDataAccessException error) {
             throw new ResourceNotFoundException("Não foi possivel deletar esse livro, pois ele não existe.");
         }
         catch (DataIntegrityViolationException error){

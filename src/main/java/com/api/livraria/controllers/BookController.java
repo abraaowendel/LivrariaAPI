@@ -3,12 +3,12 @@ package com.api.livraria.controllers;
 import com.api.livraria.entities.Book;
 import com.api.livraria.services.BookService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.format.DateTimeParseException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/books")
@@ -20,8 +20,15 @@ public class BookController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Book>> findAll(){
-        return ResponseEntity.status(HttpStatus.OK).body(service.findAll());
+    public ResponseEntity<Page<Book>> findAllPaginated(
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "12") Integer size,
+            @RequestParam(name = "direction", defaultValue = "ASC") String direction,
+            @RequestParam(name = "orderBy", defaultValue = "name") String orderBy){
+
+        PageRequest pagination = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
+
+        return ResponseEntity.status(HttpStatus.OK).body(service.findAllPaginated(pagination));
     }
     @GetMapping(value = "/{id}")
     public ResponseEntity<Book> findById(@PathVariable Long id){
