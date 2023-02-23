@@ -40,8 +40,8 @@ public class BookService {
     @Transactional
     public Book insert(Book entity) {
 
-        Author author = authorService.insert(entity.getAuthor());
-        Publisher publisher = publisherService.insert(entity.getPublisher());
+        Author author = authorService.insert(entity.getAuthor()).getBody();
+        Publisher publisher = publisherService.insert(entity.getPublisher()).getBody();
 
         entity.setAuthor(author);
         entity.setPublisher(publisher);
@@ -56,8 +56,8 @@ public class BookService {
         try{
             Book entity = repository.getReferenceById(id);
 
-            Author author = authorService.insert(entityUpdate.getAuthor());
-            Publisher publisher = publisherService.insert(entityUpdate.getPublisher());
+            Author author = authorService.insert(entityUpdate.getAuthor()).getBody();
+            Publisher publisher = publisherService.insert(entityUpdate.getPublisher()).getBody();
 
             entity.setTitle(entityUpdate.getTitle());
             entity.setDescription(entityUpdate.getDescription());

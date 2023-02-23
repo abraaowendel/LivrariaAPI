@@ -1,10 +1,9 @@
 package com.api.livraria.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -12,11 +11,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "TB_PUBLISHER")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Publisher implements Serializable {
     private static final Long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @NotBlank(message = "Nome da editora não pode ser vazio ou nulo.")

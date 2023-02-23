@@ -24,7 +24,7 @@ public class BookController {
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "12") Integer size,
             @RequestParam(name = "direction", defaultValue = "ASC") String direction,
-            @RequestParam(name = "orderBy", defaultValue = "name") String orderBy){
+            @RequestParam(name = "orderBy", defaultValue = "id") String orderBy){
 
         PageRequest pagination = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
 
@@ -37,13 +37,19 @@ public class BookController {
 
     @PostMapping
     public ResponseEntity<Book> insert(@Valid @RequestBody Book book) {
-        validation(book);
+
+        validateNotEmpty(book.getAuthor().getName(), "Autor");
+        validateNotEmpty(book.getPublisher().getName(), "Editora");
+
         return ResponseEntity.status(HttpStatus.CREATED).body(service.insert(book));
     }
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<Book> update(@PathVariable Long id, @Valid @RequestBody Book book){
-        validation(book);
+
+        validateNotEmpty(book.getAuthor().getName(), "Autor");
+        validateNotEmpty(book.getPublisher().getName(), "Editora");
+
         return ResponseEntity.status(HttpStatus.OK).body(service.update(id, book));
     }
     @DeleteMapping(value = "/{id}")
@@ -51,12 +57,9 @@ public class BookController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
-    public static void validation(Book entity){
-        if (entity.getPublisher().getName().trim().equals("")) {
-            throw new IllegalArgumentException("O nome da editora não pode estar vazio.");
-        }
-        if (entity.getAuthor().getName().trim().equals("")) {
-            throw new IllegalArgumentException("O nome do autor não pode estar vazio.");
+    public void validateNotEmpty(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("O campo " + fieldName + " não pode ser nulo ou vazio.");
         }
     }
 }

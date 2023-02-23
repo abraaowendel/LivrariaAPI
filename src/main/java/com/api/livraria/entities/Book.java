@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -21,21 +20,21 @@ public class Book implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
-    @NotBlank(message = "Titulo não pode ser vazio.")
+    @NotBlank(message = "Titulo não pode ser vazio ou nulo.")
     private String title;
-    @NotBlank(message = "Descrição não pode ser vazia.")
+    @NotBlank(message = "Descrição não pode ser vazia ou nulo.")
     private String description;
-    @Past
+    @Past(message = "Deve ser uma data no passado.")
     @DateTimeFormat(pattern = "yyyy/MM/dd")
-    @NotNull(message = "Data não pode ser vazia.")
+    @NotNull(message = "Data não pode ser vazia ou nula.")
     private LocalDate releaseDate;
     @ManyToOne
     @JoinColumn(name = "author_id")
-    @NotNull(message = "Nome do autor não pode ser nulo.")
+    @NotNull(message = "Autor não pode ser nulo.")
     private Author author;
     @ManyToOne
     @JoinColumn(name = "publisher_id")
-    @NotNull(message = "Nome da editora não pode ser nulo.")
+    @NotNull(message = "Editora não pode ser nula.")
     private Publisher publisher;
     public Book() {
     }

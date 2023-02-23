@@ -1,5 +1,6 @@
 package com.api.livraria.controllers.exceptions;
 
+import com.api.livraria.services.exceptions.DataBaseException;
 import com.api.livraria.services.exceptions.ResourceNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -64,6 +65,18 @@ public class ControllerExceptionHandler {
 
         response.setStatus(status.value());
         response.setMessage("Data inválida.");
+        response.setTimestamp(Instant.now().toString());
+
+        return ResponseEntity.status(status).body(response);
+    }
+    @ExceptionHandler(DataBaseException.class)
+    public ResponseEntity<ErrorResponse> DataBaseException(DataBaseException exception){
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ErrorResponse response = new ErrorResponse();
+
+        response.setStatus(status.value());
+        response.setMessage(exception.getMessage());
         response.setTimestamp(Instant.now().toString());
 
         return ResponseEntity.status(status).body(response);
