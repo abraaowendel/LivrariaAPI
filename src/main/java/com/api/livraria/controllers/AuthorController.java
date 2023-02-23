@@ -2,9 +2,7 @@ package com.api.livraria.controllers;
 
 import com.api.livraria.entities.Author;
 import com.api.livraria.services.AuthorService;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.info.Info;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

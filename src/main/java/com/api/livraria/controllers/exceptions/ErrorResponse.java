@@ -1,7 +1,5 @@
 package com.api.livraria.controllers.exceptions;
 
-import java.time.Instant;
-
 public class ErrorResponse {
 
     private Integer status;
