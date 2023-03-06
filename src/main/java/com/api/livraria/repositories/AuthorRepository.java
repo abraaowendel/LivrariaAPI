@@ -15,4 +15,6 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     Optional<Author> findByName(String name);
     @Query("SELECT b FROM Book b WHERE b.author.id = :author_Id")
     List<Book> findBooksByAuthorId(@Param("author_Id") Long authorId);
+    
+    boolean existsByName(String name);
 }

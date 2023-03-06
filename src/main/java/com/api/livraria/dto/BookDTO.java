@@ -1,8 +1,10 @@
-package com.api.livraria.entities;
+package com.api.livraria.dto;
 
-import com.api.livraria.dto.AuthorDTO;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import com.api.livraria.entities.Author;
+import com.api.livraria.entities.Book;
+import com.api.livraria.entities.Publisher;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -10,41 +12,43 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Objects;
 
-@Entity
-@Table(name = "TB_BOOK")
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
-public class Book implements Serializable {
+public class BookDTO implements Serializable {
     private static final Long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
     @NotBlank(message = "Titulo não pode ser vazio ou nulo.")
     private String title;
     @NotBlank(message = "Descrição não pode ser vazia ou nulo.")
-
     private String description;
     @Past(message = "Deve ser uma data no passado.")
     @DateTimeFormat(pattern = "yyyy/MM/dd")
+    @NotNull(message = "Data não pode ser vazia ou nula.")
     private LocalDate releaseDate;
-    @ManyToOne
-    @JoinColumn(name = "author_id")
-    private Author author;
-    @ManyToOne
-    @JoinColumn(name = "publisher_id")
-    private Publisher publisher;
-    public Book() {
+
+    @NotNull(message = "Autor não pode ser nulo.")
+    private AuthorDTO author;
+
+    @NotNull(message = "Editora não pode ser nula.")
+    private PublisherDTO publisher;
+
+    public BookDTO() {
     }
 
-    public Book(Long id, String title, String description, LocalDate releaseDate, Author author, Publisher publisher) {
+    public BookDTO(Long id, String title, String description, LocalDate releaseDate, AuthorDTO author, PublisherDTO publisher) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.releaseDate = releaseDate;
         this.author = author;
         this.publisher = publisher;
+    }
+    public BookDTO(Book entity) {
+        id = entity.getId();
+        title = entity.getTitle();
+        description = entity.getDescription();
+        releaseDate = entity.getReleaseDate();
+        author = new AuthorDTO(entity.getAuthor());
+        publisher = new PublisherDTO(entity.getPublisher());
     }
 
     public Long getId() {
@@ -78,33 +82,20 @@ public class Book implements Serializable {
     public void setReleaseDate(LocalDate releaseDate) {
         this.releaseDate = releaseDate;
     }
-    public Author getAuthor() {
+
+    public AuthorDTO getAuthor() {
         return author;
     }
 
-    public void setAuthor(Author author) {
+    public void setAuthor(AuthorDTO author) {
         this.author = author;
     }
 
-    public Publisher getPublisher() {
+    public PublisherDTO getPublisher() {
         return publisher;
     }
 
-    public void setPublisher(Publisher publisher) {
+    public void setPublisher(PublisherDTO publisher) {
         this.publisher = publisher;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Book book = (Book) o;
-        return Objects.equals(id, book.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
 }

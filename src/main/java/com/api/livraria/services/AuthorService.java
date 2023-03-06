@@ -1,5 +1,6 @@
 package com.api.livraria.services;
 
+import com.api.livraria.dto.AuthorDTO;
 import com.api.livraria.entities.Author;
 import com.api.livraria.entities.Book;
 import com.api.livraria.repositories.AuthorRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthorService {
@@ -25,36 +27,34 @@ public class AuthorService {
     }
 
     @Transactional
-    public List<Author> findAll() {
-        return repository.findAll();
+    public List<AuthorDTO> findAll() {
+        return repository.findAll().stream().map(AuthorDTO::new).collect(Collectors.toList());
     }
     @Transactional
-    public Author findById(Long id) {
+    public AuthorDTO findById(Long id) {
         Optional<Author> autorOptional = repository.findById(id);
-        return autorOptional.orElseThrow(() -> new ResourceNotFoundException("Esse autor não existe."));
+        return autorOptional.map(AuthorDTO::new)
+                .orElseThrow(() -> new ResourceNotFoundException("Esse autor não existe."));
     }
     @Transactional
-    public Author findByName(String name) {
+    public AuthorDTO findByName(String name) {
         Optional<Author> autorOptional = repository.findByName(name.replace("+", " "));
-        return autorOptional.orElseThrow(() -> new ResourceNotFoundException("Esse autor não existe."));
+        return autorOptional.map(AuthorDTO::new)
+                .orElseThrow(() -> new ResourceNotFoundException("Esse autor não existe."));
     }
 
     @Transactional
-    public ResponseEntity<Author> insert(Author author) {
-        Optional<Author> publisherOptional = repository.findByName(author.getName().trim());
-        return publisherOptional.map(value ->
-                ResponseEntity.status(HttpStatus.OK)
-                 .body(value))
-                 .orElseGet(() -> ResponseEntity.status(HttpStatus.CREATED)
-                 .body(repository.save(new Author(null, author.getName()))));
+    public AuthorDTO insert(Author author) {
+        repository.save(author);
+        return new AuthorDTO(author);
     }
     @Transactional
-    public Author update(Long id, Author author) {
+    public AuthorDTO update(Long id, Author author) {
         try {
             Author entity = repository.getReferenceById(id);
             entity.setName(author.getName());
             repository.save(entity);
-            return entity;
+            return new AuthorDTO(entity);
         }
         catch (EntityNotFoundException error){
             throw new ResourceNotFoundException("Autor não encontrado.");

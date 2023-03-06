@@ -1,17 +1,24 @@
 package com.api.livraria.services;
 
+import com.api.livraria.dto.AuthorDTO;
+import com.api.livraria.dto.BookDTO;
+import com.api.livraria.dto.PublisherDTO;
 import com.api.livraria.entities.Author;
 import com.api.livraria.entities.Book;
 import com.api.livraria.entities.Publisher;
+import com.api.livraria.repositories.AuthorRepository;
 import com.api.livraria.repositories.BookRepository;
+import com.api.livraria.repositories.PublisherRepository;
 import com.api.livraria.services.exceptions.DataBaseException;
 import com.api.livraria.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -19,55 +26,59 @@ import java.util.Optional;
 @Service
 public class BookService {
     private final BookRepository repository;
-    private final AuthorService authorService;
-    private final PublisherService publisherService;
+    private final AuthorRepository authorRepository;
+    private final PublisherRepository publisherRepository;
 
-    public BookService(BookRepository repository, AuthorService authorService, PublisherService publisherService) {
+    public BookService(BookRepository repository, AuthorRepository authorRepository, PublisherRepository publisherRepository) {
         this.repository = repository;
-        this.authorService = authorService;
-        this.publisherService = publisherService;
+        this.authorRepository = authorRepository;
+        this.publisherRepository = publisherRepository;
     }
 
     @Transactional
-    public Page<Book> findAllPaginated(PageRequest pagination) {
-        return repository.findAll(pagination);
+    public Page<BookDTO> findAllPaginated(Pageable pagination) {
+        return repository.findAll(pagination).map(BookDTO::new);
     }
     @Transactional
-    public Book findById(Long id) {
+    public BookDTO findById(Long id) {
         Optional<Book> entity = repository.findById(id);
-        return entity.orElseThrow(() -> new ResourceNotFoundException("Livro não encontrado."));
+        return entity.map(BookDTO::new)
+                .orElseThrow(() -> new ResourceNotFoundException("Livro não encontrado."));
     }
     @Transactional
-    public Book insert(Book entity) {
+    public BookDTO insert(BookDTO dto) {
 
-        Author author = authorService.insert(entity.getAuthor()).getBody();
-        Publisher publisher = publisherService.insert(entity.getPublisher()).getBody();
+        Author author = checkAuthor(dto.getAuthor().getName());
+        Publisher publisher = checkPublisher(dto.getPublisher().getName());
 
-        entity.setAuthor(author);
-        entity.setPublisher(publisher);
+        Book entity = new Book(null, dto.getTitle(),
+                dto.getDescription(), dto.getReleaseDate(),
+                author, publisher);
 
         repository.save(entity);
 
-        return entity;
+        return new BookDTO(entity);
     }
 
     @Transactional
-    public Book update(Long id, Book entityUpdate) {
+    public BookDTO update(Long id, BookDTO dto) {
         try{
             Book entity = repository.getReferenceById(id);
 
-            Author author = authorService.insert(entityUpdate.getAuthor()).getBody();
-            Publisher publisher = publisherService.insert(entityUpdate.getPublisher()).getBody();
+            entity.setTitle(dto.getTitle());
+            entity.setDescription(dto.getDescription());
+            entity.setReleaseDate(dto.getReleaseDate());
 
-            entity.setTitle(entityUpdate.getTitle());
-            entity.setDescription(entityUpdate.getDescription());
-            entity.setReleaseDate(entityUpdate.getReleaseDate());
+            Author author = checkAuthor(dto.getAuthor().getName());
+            Publisher publisher = checkPublisher(dto.getPublisher().getName());
+
+
             entity.setAuthor(author);
             entity.setPublisher(publisher);
 
             repository.save(entity);
 
-            return entity;
+            return new BookDTO(entity);
         }
         catch (EntityNotFoundException error){
             throw new ResourceNotFoundException("Livro não encontrado.");
@@ -84,5 +95,22 @@ public class BookService {
         catch (DataIntegrityViolationException error){
             throw new DataBaseException("Violação de integridade");
         }
+    }
+
+    public Author checkAuthor(String name){
+        return authorRepository.findByName(name)
+                .orElseGet(() -> {
+                    Author newAuthor = new Author(null, name);
+                    authorRepository.save(newAuthor);
+                    return newAuthor;
+                });
+    }
+    public Publisher checkPublisher(String name){
+        return publisherRepository.findByName(name)
+                .orElseGet(() -> {
+                    Publisher newPublisher = new Publisher(null, name);
+                    publisherRepository.save(newPublisher);
+                    return newPublisher;
+                });
     }
 }
