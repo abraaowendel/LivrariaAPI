@@ -1,5 +1,4 @@
 <h1>API para gerenciamento de uma  Livraria</h1>
-<p>Essa é uma API de gerenciamento para Livros, Editoras e Autores.</p>
 
 <h4>Requisitos</h4>
 <p>Java 8 ou superior
